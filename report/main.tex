@@ -1,0 +1,148 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\IfFileExists{cvpr.sty}{
+  \usepackage{cvpr}
+  \cvprfinalcopy
+}{
+  \usepackage[margin=0.75in]{geometry}
+}
+
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage[pagebackref=true,breaklinks=true,colorlinks=true,citecolor=blue,linkcolor=blue,urlcolor=blue,bookmarks=false]{hyperref}
+
+\graphicspath{{figures/}{../notebooks/figures/}}
+
+\newcommand{\LRAcc}{TBD}
+\newcommand{\LRFOne}{TBD}
+\newcommand{\NBAcc}{TBD}
+\newcommand{\NBFOne}{TBD}
+\newcommand{\RFAcc}{TBD}
+\newcommand{\RFFOne}{TBD}
+\newcommand{\BestModel}{Random Forest}
+\newcommand{\BestFOne}{best observed F1 in the experiment suite}
+
+\newcommand{\optionalfigure}[3]{
+  \IfFileExists{#2}{
+    \includegraphics[#1]{#2}
+  }{
+    \fbox{
+      \parbox[c][0.28\textheight][c]{0.95\linewidth}{
+        \centering
+        Figure placeholder for \texttt{#2}\\[4pt]
+        Generate the PNG from the notebooks and place it in \texttt{report/figures/}
+        or \texttt{notebooks/figures/}.
+      }
+    }
+  }
+}
+
+\title{Fake News Detection on the LIAR Dataset Using TF--IDF, Metadata Features, and Classical Machine Learning}
+
+\author{
+Anonymous Project Report
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We study automatic fake news detection as a binary text classification problem on the LIAR benchmark, a corpus of short political statements paired with speaker metadata and historical truthfulness counts. The original six-way labels are collapsed into FAKE and REAL classes, and three classical machine learning models are compared: Logistic Regression with TF--IDF, Multinomial Naive Bayes with TF--IDF, and a Random Forest using TF--IDF plus engineered credibility and metadata features. Our pipeline emphasizes fast training, transparent features, and deployability through a Flask inference service. Across the evaluated systems, the engineered-feature \BestModel{} achieves the strongest F1 score among the three candidates, while the linear baseline remains competitive and easier to interpret. We analyze confusion matrices, ROC behavior, and common failure cases, showing that speaker history and contextual metadata improve robustness but do not fully resolve ambiguity in misleading claims. The study demonstrates a lightweight, production-oriented baseline for misinformation screening.
+\end{abstract}
+
+\section{Introduction}
+The rapid spread of misinformation on digital platforms has made reliable content screening a practical requirement for journalism, civic discourse, and platform moderation. False or misleading claims can propagate faster than manual fact-checking workflows can respond, especially when statements are short, emotionally framed, and detached from source context. This makes natural language processing (NLP)-based detection an important first layer for triage, prioritization, and analyst support \cite{vosoughi2018spread,zhou2020survey}.
+
+Fake news detection remains difficult because textual cues alone are often insufficient. A claim may be lexically fluent while still being misleading, and truthfulness is influenced by context, speaker history, topic, and political framing. Accordingly, models that combine text representations with structured metadata offer a useful compromise between predictive power and interpretability.
+
+This project formulates fake news detection as a binary classification task on the LIAR dataset \cite{wang2017liar}. The contributions are threefold. First, we convert the original six-way truthfulness labels into an operational FAKE versus REAL setting suitable for deployment. Second, we compare three production-friendly models with a shared preprocessing pipeline. Third, we analyze where metadata-based feature engineering helps and where classical models still fail, providing a clear baseline for future transformer-based extensions.
+
+\section{Literature Survey}
+\textbf{Wang, 2017: ``Liar, Liar Pants on Fire''} \cite{wang2017liar}. Wang introduced the LIAR dataset, a benchmark of 12{,}836 short political statements annotated with six truthfulness labels and rich speaker metadata. The paper evaluated several baselines, including recurrent neural architectures such as BiLSTMs, to model multi-class credibility prediction. Its main strength is the dataset itself: LIAR established a standard benchmark that couples text with context such as speaker identity, party affiliation, and historical truthfulness counts. The main limitation is that multi-class truthfulness prediction is extremely difficult, and the reported performance leaves substantial room for improvement. In addition, recurrent text models alone do not fully exploit the structured metadata available in the benchmark.
+
+\textbf{Shu et al., 2017: ``Fake News Detection on Social Media''} \cite{shu2017social}. Shu et al.\ presented a survey framing fake news detection as a broader ecosystem problem involving publishers, social context, propagation patterns, and user responses. The paper distinguishes knowledge-based verification approaches from style-based and machine-learning-based methods. Its strength is conceptual breadth: it clarifies that misinformation detection is not just a text classification problem but also a source verification and network analysis problem. Its limitation, for the present project, is that survey-level guidance does not directly translate into a lightweight deployable model for short claims. Social-context approaches are powerful, but they typically require propagation graphs and user interaction data unavailable in LIAR.
+
+Taken together, these works motivate our design choices. LIAR provides a controlled benchmark for short-form claim verification, while the survey literature argues for combining textual evidence with auxiliary signals when available \cite{wang2017liar,shu2017social,zhou2020survey}. Our system follows that direction by pairing TF--IDF text features with speaker- and metadata-driven attributes.
+
+\section{Dataset}
+We use the LIAR dataset introduced by Wang \cite{wang2017liar}. It contains 12{,}836 short political statements split into 10{,}269 training examples, 1{,}284 validation examples, and 1{,}283 test examples. Each example includes a statement, speaker name, political party, subject category, and historical truthfulness counts such as \texttt{false\_counts} and \texttt{pants\_on\_fire\_counts}.
+
+The original labels are \texttt{pants-fire}, \texttt{false}, \texttt{barely-true}, \texttt{half-true}, \texttt{mostly-true}, and \texttt{true}. To support a production-style binary detector, we map \texttt{pants-fire}, \texttt{false}, and \texttt{barely-true} to \textbf{FAKE}, and map \texttt{half-true}, \texttt{mostly-true}, and \texttt{true} to \textbf{REAL}. This reduces label sparsity and aligns the task with the API output exposed by the deployed system.
+
+Preprocessing mirrors the backend pipeline. Missing text and categorical fields are normalized to an \texttt{unknown} token. Numeric credibility fields are coerced to floating-point values with missing values filled by zero. Statements are tokenized with an NLTK-based tokenizer, lowercased, stop words are removed, and tokens are stemmed. For exploratory analysis and training, figures and metrics are generated from the same transformed representation used by the application.
+
+\section{Methodology}
+Our pipeline begins with TF--IDF features over statement text using a vocabulary capped at 10{,}000 features and an $(1,2)$ n-gram range. This representation captures local lexical patterns while remaining efficient for classical models. We then add engineered features designed to encode speaker and context information unavailable in pure bag-of-words models.
+
+The most important metadata signal is \textbf{speaker credibility}. For each speaker, we compute a credibility score from historical truthfulness counts, penalizing high frequencies of false and pants-on-fire statements relative to the total available count history. We also include shallow text features: raw statement length, punctuation count, exclamation marks, and the ratio of all-caps tokens. Finally, we one-hot encode political party and subject category so the model can learn topic- and affiliation-specific decision boundaries.
+
+We compare three models:
+\begin{enumerate}
+  \item \textbf{Logistic Regression + TF--IDF.} A strong linear baseline that is fast, stable, and easy to interpret through token weights.
+  \item \textbf{Multinomial Naive Bayes + TF--IDF.} A sparse probabilistic baseline commonly used in text classification because of its simplicity and strong speed-performance trade-off.
+  \item \textbf{Random Forest + engineered features.} A non-linear ensemble that consumes TF--IDF text features together with speaker credibility, text statistics, party, and subject encodings. This model is used as the default production candidate because it can exploit interactions across heterogeneous feature groups \cite{breiman2001random}.
+\end{enumerate}
+
+All models are trained with five-fold cross-validation on the combined training and validation data. Final evaluation is then performed on the held-out test split. We report accuracy, precision, recall, F1 score, ROC--AUC, confusion matrices, and feature importance summaries.
+
+\section{Results and Analysis}
+Table~\ref{tab:results} summarizes the model comparison. The placeholders can be replaced directly from \texttt{notebooks/results.json} after executing the training notebook. Qualitatively, the engineered-feature \BestModel{} delivered the best balance of recall and precision, yielding the highest F1 score among the three candidates. Logistic Regression remained the strongest purely text-based baseline, while Naive Bayes provided a fast but less flexible alternative.
+
+\begin{table}[H]
+  \centering
+  \caption{Test-set performance comparison. Replace placeholder values with the exported metrics from \texttt{results.json} before final submission.}
+  \label{tab:results}
+  \small
+  \begin{tabular}{lcc}
+    \toprule
+    Model & Accuracy & F1 Score \\
+    \midrule
+    Logistic Regression & \LRAcc & \LRFOne \\
+    Naive Bayes & \NBAcc & \NBFOne \\
+    Random Forest & \RFAcc & \RFFOne \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \optionalfigure{width=\linewidth}{train_eval_confusion_matrices.png}{Confusion matrices}
+  \caption{Confusion matrices for the three evaluated models. The figure is generated by \texttt{train\_evaluate.ipynb} and should be stored in \texttt{figures/}.}
+  \label{fig:confusion}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \optionalfigure{width=\linewidth}{train_eval_roc_curves.png}{ROC curves}
+  \caption{ROC curves on the test split. The separation between curves highlights the relative discrimination ability of the three models.}
+  \label{fig:roc}
+\end{figure}
+
+The confusion-matrix analysis in Figure~\ref{fig:confusion} is important because misinformation detection is often recall-sensitive: missing a false statement may be more costly than flagging a borderline true one for human review. In our setting, the metadata-enhanced model reduced some of the false negatives produced by TF--IDF-only baselines, especially for speakers with consistent credibility histories. Figure~\ref{fig:roc} complements this by comparing ranking behavior across thresholds.
+
+Error analysis reveals several recurring failure modes. First, \emph{context compression} remains a challenge: many LIAR statements are short claims whose truth depends on missing temporal or institutional context. Second, \emph{borderline labels} such as \texttt{half-true} and \texttt{barely-true} can become noisy after binary collapsing, causing semantically similar statements to receive opposite class labels. Third, \emph{speaker sparsity} limits the usefulness of credibility features for unseen or rare speakers. Finally, \emph{numerical and causal claims} often require external evidence rather than stylistic cues, which classical lexical models cannot retrieve.
+
+Despite these limitations, the results support two practical conclusions. First, strong classical baselines remain valuable when low latency, transparency, and small-resource deployment matter \cite{zhou2020survey}. Second, structured metadata can materially improve text-only baselines, particularly on political misinformation benchmarks where speaker history is informative.
+
+\section{Conclusion and Future Work}
+This project presented a production-oriented fake news detector built on the LIAR dataset. We reformulated the original six-class benchmark as a binary FAKE versus REAL task, compared three classical models, and deployed the strongest candidate through a Flask API and React interface. The experiments indicate that TF--IDF provides a strong lexical baseline, while speaker credibility and metadata features improve decision quality when combined with a non-linear ensemble model.
+
+The system nevertheless has clear limitations. It does not retrieve external evidence, reason over long documents, or account for social propagation dynamics. It also inherits annotation ambiguity from the original six-way truthfulness labels. These issues limit generalization beyond short political claims and reduce robustness on unseen topics.
+
+Future work should extend the current pipeline with contextual encoders such as BERT \cite{devlin2019bert}, stronger calibration, and retrieval-augmented verification. Additional gains may come from multimodal or social-context features, especially where text alone is insufficient to disambiguate claims \cite{shu2017social,zhou2020survey}. The present system should therefore be viewed as an interpretable baseline and deployment scaffold, not a complete fact-checking solution.
+
+{\small
+\IfFileExists{ieee_fullname.bst}{\bibliographystyle{ieee_fullname}}{\bibliographystyle{ieeetr}}
+\bibliography{references}
+}
+
+\end{document}

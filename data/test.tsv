@@ -1,0 +1,8 @@
+s1	false	Hoax post claims the state banned electricity after 8 PM.	energy,state government	conspiracy blog	columnist	online	none	0	9	0	0	6	blog post
+s2	false	Viral rumor says hospitals were told to hide all cancer treatments.	health,rumor	rumor desk	blogger	online	none	1	8	1	0	5	social media
+s3	false	Fabricated claim says the election office deleted legal ballots.	elections,government	viral page	commentator	online	none	0	7	1	0	4	anonymous post
+s4	barely-true	False alert says the water authority will poison reservoirs tomorrow.	health,local policy	chain message	activist	online	none	2	7	1	0	4	messenger thread
+s5	true	Official statistics showed exports increased during the first quarter.	economy,trade	budget office	analyst	dc	nonpartisan	0	1	2	8	0	statistics release
+s6	mostly-true	The transportation agency confirmed the rail line reopened on schedule.	transportation,infrastructure	public auditors	auditor	statehouse	nonpartisan	0	1	3	7	0	agency statement
+s7	true	Public health officials reported a decline in seasonal flu admissions.	health,public policy	health department	spokesperson	statehouse	nonpartisan	0	1	2	8	0	health report
+s8	mostly-true	The inspector general said the audit found no missing grant funds.	budget,government	public records	clerk	courthouse	nonpartisan	0	1	3	7	0	audit briefing

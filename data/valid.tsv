@@ -1,0 +1,8 @@
+v1	false	Rumor says the city council banned all private cars starting Monday.	local policy,transportation	rumor desk	blogger	online	none	1	8	1	0	5	social media
+v2	false	Fabricated memo claims election machines created phantom votes overnight.	elections,technology	viral page	commentator	online	none	0	7	1	0	4	forwarded email
+v3	false	False video says the governor closed every public library permanently.	education,government	conspiracy blog	columnist	online	none	1	8	0	0	5	video clip
+v4	pants-fire	Viral hoax says the treasury will freeze debit cards this weekend.	economy,finance	chain message	activist	online	none	0	9	0	0	6	text message
+v5	true	Official report confirmed inflation cooled in the fourth quarter.	economy,finance	budget office	analyst	dc	nonpartisan	0	1	2	8	0	report
+v6	mostly-true	Health department data showed measles cases declined after the campaign.	health,public policy	health department	spokesperson	statehouse	nonpartisan	0	1	3	7	0	data release
+v7	true	Public records show the bridge inspection was completed in March.	infrastructure,government	public records	clerk	courthouse	nonpartisan	0	1	2	8	0	public filing
+v8	half-true	The finance ministry announced fuel tax revenue increased this spring.	taxes,economy	census bureau	analyst	dc	nonpartisan	1	1	4	6	0	fiscal statement

@@ -1,0 +1,16 @@
+t1	false	Viral rumor claims the city will outlaw home gardens next month.	local policy,rumor	rumor desk	blogger	online	none	1	8	1	0	5	social media
+t2	false	Fabricated post says the governor admitted the vote totals were invented.	elections,government	viral page	commentator	online	none	0	7	1	0	4	forwarded email
+t3	pants-fire	Hoax article says schools were ordered to replace water with soda.	education,health	conspiracy blog	columnist	online	none	0	9	0	0	6	clickbait site
+t4	false	False chain message claims the central bank will erase savings accounts.	economy,finance	chain message	activist	online	none	1	8	0	0	5	text message
+t5	barely-true	Blog says officials secretly tracked every ballot by GPS chip.	elections,technology	rumor desk	blogger	online	none	2	7	1	0	4	live stream
+t6	false	False post says the mayor cancelled all ambulances for weekend protests.	public safety,local policy	viral page	commentator	online	none	1	8	0	0	5	viral post
+t7	pants-fire	Rumor claims the state shut down every hospital in one night.	health,state government	conspiracy blog	columnist	online	none	0	9	0	0	6	anonymous forum
+t8	false	Viral story says the tax agency will arrest anyone using cash tomorrow.	taxes,economy	chain message	activist	online	none	1	8	0	0	5	messenger thread
+t9	true	Official budget report showed tax receipts increased over the previous year.	budget,economy	budget office	analyst	dc	nonpartisan	0	1	2	8	0	report
+t10	mostly-true	State health officials confirmed the vaccination rate rose above ninety percent.	health,public policy	health department	spokesperson	statehouse	nonpartisan	0	1	3	7	0	press briefing
+t11	true	The labor department reported unemployment claims fell for a second week.	economy,jobs	labor department	analyst	capitol	nonpartisan	0	1	2	8	0	data release
+t12	mostly-true	Auditors found the transit project finished under its revised budget target.	infrastructure,budget	public auditors	auditor	statehouse	nonpartisan	0	1	3	7	0	audit report
+t13	true	The court filing confirmed the settlement amount listed in the public record.	justice,government	public records	clerk	courthouse	nonpartisan	0	1	2	8	0	court filing
+t14	half-true	Education officials announced teacher vacancies dropped after the hiring program.	education,jobs	education office	spokesperson	statehouse	nonpartisan	1	1	4	6	0	news conference
+t15	true	The census bureau reported population growth slowed in rural counties.	demographics,economy	census bureau	analyst	dc	nonpartisan	0	1	2	8	0	data brief
+t16	mostly-true	Emergency managers said the storm shelters opened before landfall.	weather,public safety	emergency managers	director	coast	nonpartisan	0	1	3	7	0	emergency update
