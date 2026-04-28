@@ -7,7 +7,7 @@ TruthLens is a fake news detection system that classifies short political claims
 
 TruthLens is useful for academics evaluating baseline misinformation models, journalists experimenting with claim triage workflows, and curious users who want to inspect how a lightweight NLP classifier reasons about political statements.
 
-Current limitations are important: LIAR is mostly political and PolitiFact-derived, so the model does not generalize automatically to every news domain. The original six-label task is noisy and subjective, and traditional TF-IDF plus classical ML baselines commonly hit an accuracy ceiling around 70-75% on realistic full-size LIAR experiments. TruthLens should be treated as decision support, not as an automated fact-checker.
+Current limitations are important: LIAR is mostly political and PolitiFact-derived, so the model does not generalize automatically to every news domain. The original six-label task is noisy and subjective, and traditional TF-IDF plus classical ML baselines commonly hit an accuracy ceiling around 70-75% on realistic full-size LIAR experiments. TruthLens should be treated as decision support, not as an automated fact-checker..
 
 <a id="system-architecture"></a>
 ## System Architecture
