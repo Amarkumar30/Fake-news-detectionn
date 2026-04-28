@@ -1,4 +1,4 @@
-# TruthLens Setup Guide
+# TruthLens Setup Guide by amar
 
 <a id="prerequisites"></a>
 ## Prerequisites
