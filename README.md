@@ -256,8 +256,8 @@ flake8 backend tests
 
 Suggested format:
 ```text
-Your Name
-Department / Organization
-Email: your.email@example.com
-GitHub: https://github.com/your-handle
+Amar Kumar
+Computer Science / South Asian University
+Email:amar.kumar.career@gmail.com
+GitHub: https://github.com/amarkumar30
 ```
