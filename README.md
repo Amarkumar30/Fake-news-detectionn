@@ -252,10 +252,8 @@ flake8 backend tests
 ```
 
 ## Author
-**Project Maintainer:** Replace with your name, affiliation, and contact information.
 
-Suggested format:
-```text
+```tex
 Amar Kumar
 Computer Science / South Asian University
 Email:amar.kumar.career@gmail.com
